@@ -58,3 +58,10 @@ for detection in detections:
             print("unlocking door") # This is where the unlocking and locking actually happens.
             door_locked = False
 ```
+## Running the program 
+1) Start by ssh remote connecting to your nano on vs code.
+2) Then have your camera plugged into your nano.
+3) Copy the full code above.
+4) Paste it into a .py file, and run it. Make sure you are in the right directory.
+5) The code is incomplete, allowing you to use it and have it connect to whatever motor you have, and have the freedom to use it for any purpose.
+6) Have the camera mounted, and you are good to go!

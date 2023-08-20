@@ -65,3 +65,5 @@ for detection in detections:
 4) Paste it into a .py file, and run it. Make sure you are in the right directory.
 5) The code is incomplete, allowing you to use it and have it connect to whatever motor you have, and have the freedom to use it for any purpose.
 6) Have the camera mounted, and you are good to go!
+7) You can also watch this vdeo tutorial! https://youtu.be/JdIJrjob7OY !
+   

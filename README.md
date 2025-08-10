@@ -202,7 +202,7 @@ The system uses a modern dark theme with:
 
 ### Hardware
 - **Camera**: USB or built-in camera
-- **GPU**: NVIDIA Jetson device (Nano, TX2, Xavier, etc.) recommended
+- **GPU**: NVIDIA Jetson device (Nano, TX2, Xavier, etc.) recommended, raspberry pi models are okay too!
 - **RAM**: Minimum 4GB, 8GB recommended
 - **Storage**: 2GB free space for training data
 
@@ -223,7 +223,7 @@ Contributions are welcome! Please:
 
 ## 📄 License
 
-
+Just a fun project... No licencing!
 
 ## 🆘 Support
 

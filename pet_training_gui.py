@@ -101,6 +101,55 @@ class ModernPetTrainerGUI:
         )
         self.pet_name_entry.pack(fill="x", pady=(5, 0))
         
+        # Pet dimensions input
+        dimensions_frame = ctk.CTkFrame(config_frame)
+        dimensions_frame.pack(fill="x", padx=20, pady=(15, 15))
+        
+        ctk.CTkLabel(dimensions_frame, text="Pet Dimensions (when standing):", font=ctk.CTkFont(size=14, weight="bold")).pack(anchor="w")
+        
+        # Height and Length inputs
+        dim_inputs_frame = ctk.CTkFrame(dimensions_frame)
+        dim_inputs_frame.pack(fill="x", pady=(10, 0))
+        
+        # Height
+        height_frame = ctk.CTkFrame(dim_inputs_frame)
+        height_frame.pack(side="left", fill="x", expand=True, padx=(0, 10))
+        ctk.CTkLabel(height_frame, text="Height (inches):", font=ctk.CTkFont(size=12)).pack(anchor="w")
+        self.pet_height_entry = ctk.CTkEntry(height_frame, placeholder_text="e.g., 24", width=80)
+        self.pet_height_entry.pack(anchor="w", pady=(5, 0))
+        
+        # Length  
+        length_frame = ctk.CTkFrame(dim_inputs_frame)
+        length_frame.pack(side="left", fill="x", expand=True, padx=(10, 0))
+        ctk.CTkLabel(length_frame, text="Length (inches):", font=ctk.CTkFont(size=12)).pack(anchor="w")
+        self.pet_length_entry = ctk.CTkEntry(length_frame, placeholder_text="e.g., 30", width=80)
+        self.pet_length_entry.pack(anchor="w", pady=(5, 0))
+        
+        # Pet type selection
+        pet_type_frame = ctk.CTkFrame(config_frame)
+        pet_type_frame.pack(fill="x", padx=20, pady=(15, 15))
+        
+        ctk.CTkLabel(pet_type_frame, text="Pet Type:", font=ctk.CTkFont(size=14, weight="bold")).pack(anchor="w")
+        self.pet_type_var = ctk.StringVar(value="dog")
+        pet_types = [("🐕 Dog", "dog"), ("🐱 Cat", "cat"), ("🐦 Bird", "bird"), ("🐰 Other", "other")]
+        
+        pet_type_buttons_frame = ctk.CTkFrame(pet_type_frame)
+        pet_type_buttons_frame.pack(fill="x", pady=(10, 0))
+        
+        self.pet_type_buttons = {}
+        for i, (display_name, pet_type) in enumerate(pet_types):
+            btn = ctk.CTkButton(
+                pet_type_buttons_frame,
+                text=display_name,
+                command=lambda pt=pet_type: self.select_pet_type(pt),
+                width=100,
+                height=35
+            )
+            btn.pack(side="left", padx=5)
+            self.pet_type_buttons[pet_type] = btn
+        
+        self.select_pet_type("dog")  # Default selection
+        
         # Pose selection
         pose_frame = ctk.CTkFrame(config_frame)
         pose_frame.pack(fill="x", padx=20, pady=(0, 20))
@@ -225,6 +274,17 @@ class ModernPetTrainerGUI:
         self.existing_pets_frame = ctk.CTkFrame(existing_frame)
         self.existing_pets_frame.pack(fill="x", padx=20, pady=(0, 15))
         
+    def select_pet_type(self, pet_type):
+        """Select pet type"""
+        self.pet_type_var.set(pet_type)
+        
+        # Update button colors
+        for ptype, btn in self.pet_type_buttons.items():
+            if ptype == pet_type:
+                btn.configure(fg_color="#1f538d")  # Active color
+            else:
+                btn.configure(fg_color="#3b82f6")  # Default color
+    
     def select_pose(self, pose_key):
         """Select a pose for training"""
         self.current_pose = pose_key
@@ -308,15 +368,30 @@ class ModernPetTrainerGUI:
             messagebox.showwarning("Warning", "Please enter a pet name first")
             return
         
+        # Get pet dimensions
+        try:
+            pet_height = float(self.pet_height_entry.get().strip()) if self.pet_height_entry.get().strip() else 0
+            pet_length = float(self.pet_length_entry.get().strip()) if self.pet_length_entry.get().strip() else 0
+        except ValueError:
+            messagebox.showwarning("Warning", "Please enter valid numbers for pet dimensions")
+            return
+        
+        if pet_height <= 0 or pet_length <= 0:
+            messagebox.showwarning("Warning", "Please enter pet height and length in inches")
+            return
+        
         ret, frame = self.camera.read()
         if ret:
-            # Store the captured image
+            # Store the captured image with dimensions
             timestamp = int(time.time() * 1000)
             image_data = {
                 'pet_name': pet_name,
                 'pose': self.current_pose,
                 'timestamp': timestamp,
-                'frame': frame
+                'frame': frame,
+                'height_inches': pet_height,
+                'length_inches': pet_length,
+                'pet_type': self.pet_type_var.get()
             }
             self.captured_images.append(image_data)
             
@@ -326,7 +401,9 @@ class ModernPetTrainerGUI:
             # Update statistics
             self.update_statistics()
             
-            messagebox.showinfo("Success", f"📸 Photo captured for {pet_name} ({self.current_pose})")
+            messagebox.showinfo("Success", f"📸 Photo captured for {pet_name} ({self.current_pose})\nDimensions: {pet_height}\" H x {pet_length}\" L")
+        else:
+            messagebox.showerror("Error", "Failed to capture photo")
     
     def add_captured_image_to_display(self, frame, pet_name, pose):
         """Add captured image to the display"""
@@ -427,13 +504,16 @@ class ModernPetTrainerGUI:
                         features_by_pose[pose] = []
                     features_by_pose[pose].append(features.flatten())
             
-            # Save pet profile
+            # Save pet profile with dimensions
             profile = {
                 'name': pet_name,
                 'total_images': len(self.captured_images),
                 'poses': list(features_by_pose.keys()),
                 'created_at': time.time(),
-                'image_count_by_pose': {pose: len(features) for pose, features in features_by_pose.items()}
+                'image_count_by_pose': {pose: len(features) for pose, features in features_by_pose.items()},
+                'height_inches': self.captured_images[0]['height_inches'] if self.captured_images else 0,
+                'length_inches': self.captured_images[0]['length_inches'] if self.captured_images else 0,
+                'pet_type': self.captured_images[0]['pet_type'] if self.captured_images else 'unknown'
             }
             
             # Save profile JSON

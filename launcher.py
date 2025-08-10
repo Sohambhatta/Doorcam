@@ -85,8 +85,11 @@ def launch_door_camera():
     """Launch the enhanced door camera system"""
     print("🚀 Starting Enhanced Door Camera System...")
     print("📹 Make sure your camera is connected!")
-    print("🔒 Door will automatically lock when pets get too close")
-    print("👤 Door will unlock for detected persons")
+    print("🤖 Motor control system initialized")
+    print("🔒 Smart door logic: Person=OPEN, Pet-close=CLOSE")
+    print("📏 Using dimension-based pet detection thresholds")
+    print("👤 Door opens only when person detected AND no pets too close")
+    print("🐾 Door closes immediately when pets get too close")
     print("\n⚠️  Press Ctrl+C to stop the system\n")
     
     try:
